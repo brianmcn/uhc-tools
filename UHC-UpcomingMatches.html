@@ -89,7 +89,11 @@
 
             var currentTime = new Date();
             var currentTimeMsEpoch = currentTime.getTime();
-            var output = "(Current UTC time is " + currentTime.getUTCHours() + ":" + currentTime.getUTCMinutes() + ")<br/><br/><table>";
+            var currentHours = currentTime.getUTCHours().toString();
+            currentHours = currentHours.length == 1 ? "0" + currentHours : currentHours;
+            var currentMinutes = currentTime.getUTCMinutes().toString();
+            currentMinutes = currentMinutes.length == 1 ? "0" + currentMinutes : currentMinutes;
+            var output = "(Current UTC time is " + currentHours + ":" + currentMinutes + ")<br/><br/><table>";
             parsed.forEach(function (p) {
                 var timeText = ago(currentTimeMsEpoch, p);
                 timeText = /ago$/.test(timeText) ? "<i>" + timeText + "</i>" : timeText;

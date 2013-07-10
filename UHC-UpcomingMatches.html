@@ -50,8 +50,8 @@
         }
 
         function myfunc(data) {
-            parsed = new Array();
-            unparsed = new Array();
+            var parsed = new Array();
+            var unparsed = new Array();
             for (var i in data.data.children) {
                 title = data.data.children[i].data.title;
                 url = data.data.children[i].data.url;

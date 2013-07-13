@@ -6,13 +6,15 @@
 </head>
 <body>
     <h1>Upcoming UHC matches</h1>
-    <p>This page shows upcoming UHC matches from the <a href="http://se.reddit.com/r/ultrahardcore/">ultrahardcore</a> subreddit.  (Source data: JSONP version of <a href="http://www.se.reddit.com/r/ultrahardcore/search?q=flair%3AUpcoming_Match&restrict_sr=on&sort=new">this page</a>.)</p>
+    <p>This page shows upcoming UHC matches from the <a href="http://se.reddit.com/r/ultrahardcore/">ultrahardcore</a> subreddit.  (Source data: JSONP version of <a href="http://www.se.reddit.com/r/ultrahardcore/search?q=flair%3AUpcoming_Match&amp;restrict_sr=on&amp;sort=new">this page</a>.)</p>
     <h3>Matches whose titles were successfully parsed</h3>
     Note: <i>italicized titles</i> indicate 'best guess', as title is not perfectly formatted.
     <br/>
     <div id="parsedplaceholder"></div>
+    <noscript>(No data here, because Javascript is disabled on this page for some reason.)</noscript>
     <h3>Matches whose titles could not be parsed</h3>
     <div id="unparsedplaceholder"></div>
+    <noscript>(No data here, because Javascript is disabled on this page for some reason.)</noscript>
     <script type="text/javascript">
         // NOTE lack of year info means this script will not work over new years (Dec N - Jan N+1)
 
@@ -111,7 +113,7 @@
     </script>
 
     <!-- use reddit JSONP apis to get page data as JSON and call myfunc with it -->
-    <script type="text/javascript" src="http://www.se.reddit.com/r/ultrahardcore/search.json?q=flair%3AUpcoming_Match&restrict_sr=on&sort=new&jsonp=myfunc"></script>
+    <script type="text/javascript" src="http://www.se.reddit.com/r/ultrahardcore/search.json?q=flair%3AUpcoming_Match&amp;restrict_sr=on&amp;sort=new&amp;jsonp=myfunc"></script>
 
 </body>
 </html>

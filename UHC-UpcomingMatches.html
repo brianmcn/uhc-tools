@@ -18,6 +18,7 @@
     <ul>
         <li><i>Italicized titles</i> indicate a 'best guess', as title is not perfectly <a href="http://www.reddit.com/r/ultrahardcore/comments/1gk1ss/a_proposal_standardized_match_post_titles/">formatted</a>.</li>
         <li><i>Italicized times</i> ("ago") indicate matches that have probably already begun, but that still have "Upcoming Match" flair.</li>
+        <li>Text size indicated how far ahead of time the match was advertised; small text is impromptus posted shortly before the match, large text is matches posted well in advance.
     </ul>
     <noscript>(No data here, because Javascript is disabled on this page for some reason.)</noscript>
     <h3>Matches whose titles could not be parsed</h3>
@@ -32,12 +33,7 @@
         // NOTE lack of year info means this script will not work over new years (Dec N - Jan N+1)
 
         function ago(currentTimeMsEpoch, p) {
-            var date = new Date();
-            date.setUTCMonth(p.month);
-            date.setUTCDate(p.date);
-            date.setUTCHours(p.hour);
-            date.setUTCMinutes(p.minute);
-            var dateMsEpoch = date.getTime();
+            var dateMsEpoch = p.dateMillis;
             var diffMs = Math.abs(currentTimeMsEpoch - dateMsEpoch);
             var words = "";
             if (diffMs > 1000 * 60 * 60 * 24) {
@@ -60,6 +56,25 @@
             }
         }
 
+        function fontStyleMarkup(p) {
+            var hoursAhead = (p.dateMillis - p.createdMillis) / (1000*60*60);
+            var weight = "normal";
+            var size = "100%"
+            if (hoursAhead < 1) {
+                weight = "lighter";
+                size = "85%"
+            }
+            if (hoursAhead > 3) {
+                weight = "bold";
+                size = "115%"
+            }
+            if (hoursAhead > 12) {
+                weight = "bolder";
+                size = "130%"
+            }
+            return "style='font-size:" + size + "'";
+        }
+
         function parseMonth(s) {
             return (/Jul/i).test(s) ? 6 : 
                    (/Aug/i).test(s) ? 7 : 
@@ -74,14 +89,15 @@
             var unparsed = new Array();
             var isCompletedMatches = data.data.children.length == 100; // take advantage of 'limit' in reddit API
             for (var i in data.data.children) {
-                title = data.data.children[i].data.title;
-                url = data.data.children[i].data.url;
-                regex = /(\w*)( +)(\d+)( +)(\d+):(\d+)( +)UTC(.*)/;
-                r = regex.exec(title);
+                var title = data.data.children[i].data.title;
+                var url = data.data.children[i].data.url;
+                var created_utc = data.data.children[i].data.created_utc;
+                var regex = /(\w*)( +)(\d+)( +)(\d+):(\d+)( +)UTC(.*)/;
+                var r = regex.exec(title);
                 if (r) {
-                    nMonth = parseMonth(r[1]);
+                    var nMonth = parseMonth(r[1]);
                     if (nMonth) {
-                        isPerfectMatch =
+                        var isPerfectMatch =
                             r[1].length == 3 && /[A-Z][a-z][a-z]/.test(r[1]) && // "Jul"
                             r[2].length == 1 && // " "
                             r[3].length == 2 && // "04"
@@ -90,7 +106,13 @@
                             r[6].length == 2 && // "59"
                             r[7].length == 1 && // " "   UTC
                             /^ - /.test(r[8]);  // " - "
-                        parsed.push({ title:title, url:url, month:nMonth, date:+r[3], hour:+r[5], minute:+r[6], isPerfectMatch:isPerfectMatch });
+                        var date = new Date();
+                        date.setUTCMonth(nMonth);
+                        date.setUTCDate(+r[3]);
+                        date.setUTCHours(+r[5]);
+                        date.setUTCMinutes(+r[6]);
+                        var dateMillis = date.getTime();
+                        parsed.push({ title:title, url:url, month:nMonth, date:+r[3], hour:+r[5], minute:+r[6], dateMillis:dateMillis, createdMillis:created_utc*1000, isPerfectMatch:isPerfectMatch });
                     }
                     else {
                         unparsed.push({ title: title, url: url });
@@ -102,10 +124,7 @@
             }
 
             parsed.sort(function (a, b) {
-                return a.month < b.month ? -1 : a.month > b.month ? 1 :
-                       a.date < b.date ? -1 : a.date > b.date ? 1 :
-                       a.hour < b.hour ? -1 : a.hour > b.hour ? 1 :
-                       a.minute < b.minute ? -1 : a.minute > b.minute ? 1 : 0
+                return a.dateMillis < b.dateMillis ? -1 : a.dateMillis > b.dateMillis ? 1 : 0;
             });
 
             var currentTime = new Date();
@@ -114,24 +133,26 @@
             currentHours = currentHours.length == 1 ? "0" + currentHours : currentHours;
             var currentMinutes = currentTime.getUTCMinutes().toString();
             currentMinutes = currentMinutes.length == 1 ? "0" + currentMinutes : currentMinutes;
-            if (isCompletedMatches) {
-                parsed.reverse();
-                var output = "<table>";
-                parsed.forEach(function (p) {
+            var output = "";
+            var show = function (p) {
                     var timeText = ago(currentTimeMsEpoch, p);
                     timeText = /ago$/.test(timeText) ? "<i>" + timeText + "</i>" : timeText;
-                    output += "<tr><td align='center'>" + timeText + "</td><td>&nbsp;&nbsp;<td><a href='" + p.url + "'>" + (p.isPerfectMatch ? "" : "<i>") + p.title + (p.isPerfectMatch ? "" : "</i>") + "</a></td></tr>";
-                });
+                    output += "<tr " + fontStyleMarkup(p) +"><td align='center'>" + timeText 
+                        + "</td><td>&nbsp;&nbsp;<td><a href='" + p.url + "'>" + (p.isPerfectMatch ? "" : "<i>") 
+                        + p.title + (p.isPerfectMatch ? "" : "</i>") + "</a></td><td>posted "
+                        + Math.floor((p.dateMillis - p.createdMillis) / (1000*60*60)) + " hours ahead</tr>";
+                };
+
+            if (isCompletedMatches) {
+                parsed.reverse();
+                output = "<table>";
+                parsed.forEach(show);
                 output += "</table>";
                 document.getElementById("parsedcompletedplaceholder").innerHTML = output;
             }
             else {
-                var output = "(Current UTC time is " + currentHours + ":" + currentMinutes + ")<br/><br/><table>";
-                parsed.forEach(function (p) {
-                    var timeText = ago(currentTimeMsEpoch, p);
-                    timeText = /ago$/.test(timeText) ? "<i>" + timeText + "</i>" : timeText;
-                    output += "<tr><td align='center'>" + timeText + "</td><td>&nbsp;&nbsp;<td><a href='" + p.url + "'>" + (p.isPerfectMatch ? "" : "<i>") + p.title + (p.isPerfectMatch ? "" : "</i>") + "</a></td></tr>";
-                });
+                output = "(Current UTC time is " + currentHours + ":" + currentMinutes + ")<br/><br/><table>";
+                parsed.forEach(show);
                 output += "</table>";
                 document.getElementById("parsedplaceholder").innerHTML = output;
                 output = "<ul>";
@@ -150,4 +171,3 @@
 
 </body>
 </html>
-

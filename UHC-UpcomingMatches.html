@@ -106,7 +106,8 @@
                             r[6].length == 2 && // "59"
                             r[7].length == 1 && // " "   UTC
                             /^ - /.test(r[8]);  // " - "
-                        var date = new Date();
+                        var date = new Date(0);
+                        date.setUTCFullYear(2013);
                         date.setUTCMonth(nMonth);
                         date.setUTCDate(+r[3]);
                         date.setUTCHours(+r[5]);

@@ -90,8 +90,8 @@
             var isCompletedMatches = data.data.children.length == 100; // take advantage of 'limit' in reddit API
             for (var i in data.data.children) {
                 var title = data.data.children[i].data.title;
-                if (title.length > 80) {
-                    title = title.substr(0, 80) + "...";
+                if (title.length > 100) {
+                    title = title.substr(0, 100) + "...";
                 }
                 var url = data.data.children[i].data.url;
                 var created_utc = data.data.children[i].data.created_utc;

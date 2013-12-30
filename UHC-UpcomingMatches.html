@@ -76,7 +76,13 @@
         }
 
         function parseMonth(s) {
-            return (/Jul/i).test(s) ? 6 : 
+            return (/Jan/i).test(s) ? 0 :
+                   (/Feb/i).test(s) ? 1 :
+                   (/Mar/i).test(s) ? 2 :
+                   (/Apr/i).test(s) ? 3 :
+                   (/May/i).test(s) ? 4 :
+                   (/Jun/i).test(s) ? 5 :
+                   (/Jul/i).test(s) ? 6 : 
                    (/Aug/i).test(s) ? 7 : 
                    (/Sep/i).test(s) ? 8 :
                    (/Oct/i).test(s) ? 9 :

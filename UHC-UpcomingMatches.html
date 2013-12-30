@@ -87,7 +87,7 @@
                    (/Sep/i).test(s) ? 8 :
                    (/Oct/i).test(s) ? 9 :
                    (/Nov/i).test(s) ? 10 :
-                   (/Dec/i).test(s) ? 11 : null; // TODO parse all months, NOTE javascript uses 0-11 for months
+                   (/Dec/i).test(s) ? 11 : null; // NOTE javascript uses 0-11 for months
         }
 
         function myfunc(data) {
@@ -116,7 +116,11 @@
                             r[7].length == 1 && // " "   UTC
                             /^ - /.test(r[8]);  // " - "
                         var date = new Date(0);
-                        date.setUTCFullYear(2013);
+                        if (nMonth > 10) {
+                            date.setUTCFullYear(2013); // TODO get rid of this hack and be smart
+                        } else {
+                            date.setUTCFullYear(2014);
+                        }
                         date.setUTCMonth(nMonth);
                         date.setUTCDate(+r[3]);
                         date.setUTCHours(+r[5]);
